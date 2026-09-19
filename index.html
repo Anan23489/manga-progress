@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>進捗 — 原稿進度</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EFE7D6;
+    --paper-2: #E6DCC6;
+    --ink: #211E1A;
+    --ink-soft: #4A453D;
+    --vermilion: #AE3428;
+    --vermilion-deep: #8A281F;
+    --indigo: #33415C;
+    --tone-dot: #B9AF98;
+    --line-hair: rgba(33,30,26,0.14);
+    --card: #F7F2E7;
+    --success: #4B6350;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1B1815;
+      --paper-2: #232019;
+      --ink: #EDE6D6;
+      --ink-soft: #B8B0A0;
+      --vermilion: #D9584A;
+      --vermilion-deep: #C24A3D;
+      --indigo: #8FA0C4;
+      --tone-dot: #4A4538;
+      --line-hair: rgba(237,230,214,0.14);
+      --card: #221F19;
+      --success: #7FA087;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1B1815;
+    --paper-2: #232019;
+    --ink: #EDE6D6;
+    --ink-soft: #B8B0A0;
+    --vermilion: #D9584A;
+    --vermilion-deep: #C24A3D;
+    --indigo: #8FA0C4;
+    --tone-dot: #4A4538;
+    --line-hair: rgba(237,230,214,0.14);
+    --card: #221F19;
+    --success: #7FA087;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image:
+      radial-gradient(var(--tone-dot) 0.6px, transparent 0.6px);
+    background-size: 10px 10px;
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Zen Kaku Gothic New', 'Noto Sans TC', sans-serif;
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 18px 64px;
+  }
+
+  /* ---------- Header / Hero ---------- */
+  header.hero {
+    position: relative;
+    padding: 22px 20px 26px;
+    margin-bottom: 22px;
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .hero-title {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    margin: 0 0 2px;
+  }
+  .hero-sub {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .stamp {
+    width: 84px;
+    height: 84px;
+    border: 3px solid var(--vermilion);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--vermilion);
+    flex-shrink: 0;
+    transform: rotate(-3deg);
+    background: transparent;
+  }
+  .stamp .num {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1;
+  }
+  .stamp .pct {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  .progress-rail {
+    margin-top: 22px;
+    height: 10px;
+    background: var(--paper-2);
+    border: 1px solid var(--line-hair);
+    border-radius: 2px;
+    overflow: hidden;
+    display: flex;
+  }
+  .progress-rail .seg { height: 100%; }
+  .seg-line { background: var(--indigo); opacity: 0.55; }
+  .seg-tone { background: var(--indigo); opacity: 0.8; }
+  .seg-done { background: var(--vermilion); }
+
+  .rail-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    flex-wrap: wrap;
+  }
+  .rail-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .dot.line { background: var(--indigo); opacity: 0.55; }
+  .dot.tone { background: var(--indigo); opacity: 0.8; }
+  .dot.done { background: var(--vermilion); }
+
+  .cheer {
+    margin-top: 16px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 14.5px;
+    color: var(--ink);
+    border-left: 3px solid var(--vermilion);
+    padding-left: 10px;
+    line-height: 1.6;
+  }
+
+  /* ---------- Section titles ---------- */
+  .section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 30px 0 12px;
+  }
+  .section-title .jp {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .section-title .zh {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+  .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line-hair);
+  }
+
+  /* ---------- Page grid ---------- */
+  .grid-card {
+    background: var(--card);
+    border: 1px solid var(--line-hair);
+    border-radius: 4px;
+    padding: 16px 14px;
+  }
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+  }
+  @media (max-width: 420px) {
+    .page-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+  .cell {
+    aspect-ratio: 1;
+    position: relative;
+    border: 1.5px solid var(--ink);
+    border-radius: 3px;
+    background: var(--paper);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 11px;
+    color: var(--ink-soft);
+    user-select: none;
+    transition: transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cell:active { transform: scale(0.92); }
+  .cell[data-stage="0"] { background: var(--paper); }
+  .cell[data-stage="1"] {
+    background: linear-gradient(135deg, var(--indigo) 0 50%, var(--paper) 50% 100%);
+    opacity: 0.85;
+    color: var(--paper);
+  }
+  .cell[data-stage="1"]::after { content:''; }
+  .cell[data-stage="2"] {
+    background: var(--indigo);
+    color: var(--paper);
+    opacity: 0.88;
+  }
+  .cell[data-stage="3"] {
+    background: var(--vermilion);
+    color: var(--paper);
+    border-color: var(--vermilion-deep);
+  }
+  .cell .n {
+    position: absolute;
+    bottom: 2px;
+    right: 3px;
+    font-size: 9px;
+    opacity: 0.75;
+  }
+
+  .grid-hint {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  /* ---------- Stats ---------- */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--line-hair);
+    border-radius: 4px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .stat-card .val {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--indigo);
+  }
+  .stat-card .label {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* ---------- Estimate ---------- */
+  .estimate-card {
+    background: var(--card);
+    border: 1px solid var(--line-hair);
+    border-radius: 4px;
+    padding: 18px 16px;
+  }
+  .estimate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--line-hair);
+    font-size: 13.5px;
+  }
+  .estimate-row:last-of-type { border-bottom: none; }
+  .estimate-row .stage-name { color: var(--ink-soft); }
+  .estimate-row .stage-days { font-family: 'Shippori Mincho', serif; font-weight: 600; }
+  .speed-input {
+    width: 48px;
+    text-align: center;
+    background: var(--paper);
+    border: 1px solid var(--line-hair);
+    border-radius: 3px;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 3px 2px;
+  }
+  .final-date {
+    margin-top: 14px;
+    text-align: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--line-hair);
+  }
+  .final-date .label { font-size: 11.5px; color: var(--ink-soft); }
+  .final-date .date {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--vermilion);
+    margin-top: 4px;
+  }
+
+  /* ---------- Footer actions ---------- */
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 26px;
+  }
+  .btn {
+    flex: 1;
+    padding: 11px;
+    border-radius: 3px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn.danger { border-color: var(--vermilion); color: var(--vermilion); }
+
+  footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div>
+        <p class="hero-title">原稿進捗</p>
+        <p class="hero-sub" id="subTotalLabel">全40頁・描線／網點／精修</p>
+      </div>
+      <div class="stamp">
+        <div class="num" id="stampPct">0</div>
+        <div class="pct">%</div>
+      </div>
+    </div>
+
+    <div class="progress-rail">
+      <div class="seg seg-line" id="railLine"></div>
+      <div class="seg seg-tone" id="railTone"></div>
+      <div class="seg seg-done" id="railDone"></div>
+    </div>
+    <div class="rail-legend">
+      <span><i class="dot line"></i>描線 50%</span>
+      <span><i class="dot tone"></i>網點 80%</span>
+      <span><i class="dot done"></i>精修 100%</span>
+    </div>
+
+    <p class="cheer" id="cheerText">一頁一頁來，穩穩地畫下去。</p>
+  </header>
+
+  <div class="section-title"><span class="jp">頁面</span><span class="zh">點一下切換階段</span></div>
+  <div class="grid-card">
+    <div class="page-grid" id="pageGrid"></div>
+    <p class="grid-hint">白＝未開始　　斜＝描線　　深＝網點　　紅＝精修完成</p>
+  </div>
+
+  <div class="section-title"><span class="jp">內訳</span><span class="zh">頁數統計</span></div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="val" id="statLine">0</div>
+      <div class="label">已描線</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="statTone">0</div>
+      <div class="label">已上網點</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="statDone">0</div>
+      <div class="label">已精修完成</div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="jp">完成予測</span><span class="zh">依目前速度估算</span></div>
+  <div class="estimate-card">
+    <div class="estimate-row">
+      <span class="stage-name">描線・剩 <span id="remLine">0</span> 頁　／　速度 <input class="speed-input" id="speedLine" type="number" min="0.1" step="0.25" value="5.25"> 頁/天</span>
+      <span class="stage-days" id="daysLine">0天</span>
+    </div>
+    <div class="estimate-row">
+      <span class="stage-name">網點・剩 <span id="remTone">0</span> 頁　／　速度 <input class="speed-input" id="speedTone" type="number" min="0.1" step="0.25" value="5"> 頁/天</span>
+      <span class="stage-days" id="daysTone">0天</span>
+    </div>
+    <div class="estimate-row">
+      <span class="stage-name">精修・剩 <span id="remFinish">0</span> 頁　／　速度 <input class="speed-input" id="speedFinish" type="number" min="0.1" step="0.25" value="5"> 頁/天</span>
+      <span class="stage-days" id="daysFinish">0天</span>
+    </div>
+    <div class="final-date">
+      <div class="label">預估全部完稿</div>
+      <div class="date" id="finalDate">—</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="fillLineBtn">整批標記描線</button>
+    <button class="btn danger" id="resetBtn">重設所有頁面</button>
+  </div>
+
+  <footer>進度資料只存在這個瀏覽器裡，換裝置不會同步。</footer>
+</div>
+
+<script>
+(function () {
+  var TOTAL = 40;
+  var STORE_KEY = 'manga_progress_v1';
+  var SPEED_KEY = 'manga_speed_v1';
+  var stages = null; // array of 0..3
+
+  var cheers = [
+    { min: 0,  text: "一頁一頁來，穩穩地畫下去。" },
+    { min: 15, text: "已經超過一成了，節奏抓得不錯。" },
+    { min: 30, text: "三成過去了，手感正在上來。" },
+    { min: 45, text: "快到一半了，繼續保持。" },
+    { min: 55, text: "過半了，剩下的路比想像中短。" },
+    { min: 70, text: "七成，網點跟精修都看得到頭了。" },
+    { min: 85, text: "最後衝刺階段，撐住。" },
+    { min: 97, text: "只差最後幾筆，馬上就完成了。" },
+    { min: 100, text: "全部完成了，辛苦了，這本畫完了。" }
+  ];
+
+  function loadStages() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length === TOTAL) return parsed;
+      }
+    } catch (e) {}
+    return new Array(TOTAL).fill(0);
+  }
+
+  function saveStages() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(stages)); } catch (e) {}
+  }
+
+  function loadSpeeds() {
+    try {
+      var raw = localStorage.getItem(SPEED_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+
+  function saveSpeeds() {
+    try {
+      localStorage.setItem(SPEED_KEY, JSON.stringify({
+        line: parseFloat(document.getElementById('speedLine').value) || 0,
+        tone: parseFloat(document.getElementById('speedTone').value) || 0,
+        finish: parseFloat(document.getElementById('speedFinish').value) || 0
+      }));
+    } catch (e) {}
+  }
+
+  function buildGrid() {
+    var grid = document.getElementById('pageGrid');
+    grid.innerHTML = '';
+    for (var i = 0; i < TOTAL; i++) {
+      (function (idx) {
+        var cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.setAttribute('data-stage', stages[idx]);
+        var n = document.createElement('span');
+        n.className = 'n';
+        n.textContent = idx + 3;
+        cell.appendChild(n);
+        cell.addEventListener('click', function () {
+          stages[idx] = (stages[idx] + 1) % 4;
+          cell.setAttribute('data-stage', stages[idx]);
+          saveStages();
+          render();
+        });
+        grid.appendChild(cell);
+      })(i);
+    }
+  }
+
+  function pageStagePercent(s) {
+    if (s === 1) return 50;
+    if (s === 2) return 80;
+    if (s === 3) return 100;
+    return 0;
+  }
+
+  function render() {
+    var lineDone = 0, toneDone = 0, finishDone = 0;
+    var sumPct = 0;
+    for (var i = 0; i < TOTAL; i++) {
+      var s = stages[i];
+      if (s >= 1) lineDone++;
+      if (s >= 2) toneDone++;
+      if (s >= 3) finishDone++;
+      sumPct += pageStagePercent(s);
+    }
+    var overallPct = sumPct / TOTAL;
+    var overallRound = Math.round(overallPct * 10) / 10;
+
+    document.getElementById('stampPct').textContent = Math.round(overallPct);
+    document.getElementById('statLine').textContent = lineDone;
+    document.getElementById('statTone').textContent = toneDone;
+    document.getElementById('statDone').textContent = finishDone;
+
+    // rail: proportion of total "credit" split into 3 visual bands based on
+    // how much of the overall percentage comes from each stage band
+    var lineCredit = 0, toneCredit = 0, doneCredit = 0;
+    for (var j = 0; j < TOTAL; j++) {
+      var st = stages[j];
+      if (st === 1) lineCredit += 50;
+      else if (st === 2) toneCredit += 80;
+      else if (st === 3) doneCredit += 100;
+    }
+    var maxCredit = TOTAL * 100;
+    document.getElementById('railLine').style.width = (lineCredit / maxCredit * 100) + '%';
+    document.getElementById('railTone').style.width = (toneCredit / maxCredit * 100) + '%';
+    document.getElementById('railDone').style.width = (doneCredit / maxCredit * 100) + '%';
+
+    // cheer message
+    var msg = cheers[0].text;
+    for (var k = 0; k < cheers.length; k++) {
+      if (overallPct >= cheers[k].min) msg = cheers[k].text;
+    }
+    document.getElementById('cheerText').textContent = msg;
+
+    // remaining pages per stage
+    var remLine = TOTAL - lineDone;
+    var remTone = TOTAL - toneDone;
+    var remFinish = TOTAL - finishDone;
+    document.getElementById('remLine').textContent = remLine;
+    document.getElementById('remTone').textContent = remTone;
+    document.getElementById('remFinish').textContent = remFinish;
+
+    var speedLine = parseFloat(document.getElementById('speedLine').value) || 0;
+    var speedTone = parseFloat(document.getElementById('speedTone').value) || 0;
+    var speedFinish = parseFloat(document.getElementById('speedFinish').value) || 0;
+
+    var daysLine = speedLine > 0 ? Math.ceil(remLine / speedLine) : 0;
+    var daysTone = speedTone > 0 ? Math.ceil(remTone / speedTone) : 0;
+    var daysFinish = speedFinish > 0 ? Math.ceil(remFinish / speedFinish) : 0;
+
+    document.getElementById('daysLine').textContent = daysLine + '天';
+    document.getElementById('daysTone').textContent = daysTone + '天';
+    document.getElementById('daysFinish').textContent = daysFinish + '天';
+
+    var totalDays = daysLine + daysTone + daysFinish;
+    var today = new Date();
+    var finalD = new Date(today.getTime() + totalDays * 86400000);
+    var finalStr = finalD.getFullYear() + '/' + (finalD.getMonth() + 1) + '/' + finalD.getDate();
+    document.getElementById('finalDate').textContent = overallPct >= 100 ? '已全部完成' : finalStr + '（約' + totalDays + '天後）';
+  }
+
+  document.getElementById('speedLine').addEventListener('input', function () { saveSpeeds(); render(); });
+  document.getElementById('speedTone').addEventListener('input', function () { saveSpeeds(); render(); });
+  document.getElementById('speedFinish').addEventListener('input', function () { saveSpeeds(); render(); });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    if (confirm('確定要清空所有頁面進度嗎？這個動作無法復原。')) {
+      stages = new Array(TOTAL).fill(0);
+      saveStages();
+      buildGrid();
+      render();
+    }
+  });
+
+  document.getElementById('fillLineBtn').addEventListener('click', function () {
+    var n = prompt('目前已完成描線的頁數（從第1頁開始算）：', '0');
+    var count = parseInt(n, 10);
+    if (isNaN(count)) return;
+    count = Math.max(0, Math.min(TOTAL, count));
+    for (var i = 0; i < TOTAL; i++) {
+      if (i < count && stages[i] < 1) stages[i] = 1;
+    }
+    saveStages();
+    buildGrid();
+    render();
+  });
+
+  // init
+  stages = loadStages();
+  var savedSpeeds = loadSpeeds();
+  if (savedSpeeds) {
+    if (savedSpeeds.line) document.getElementById('speedLine').value = savedSpeeds.line;
+    if (savedSpeeds.tone) document.getElementById('speedTone').value = savedSpeeds.tone;
+    if (savedSpeeds.finish) document.getElementById('speedFinish').value = savedSpeeds.finish;
+  }
+  buildGrid();
+  render();
+})();
+</script>
+</body>
+</html>
